@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+
+SLIDES_DIR_ON_HOST="$(pwd)/slides"
+SLIDES_DIR_ON_CONTAINER="/slides/"
+
+WEB_PORT_ON_HOST=8000
+WEB_PORT_ON_CONTAINER=8000
+
+REVEAL_JS_IMAGE="danidemi/docker-reveal.js:latest"
+
+DELAY_BEFORE_OPEN=1
+WEB_BROWSER="Google Chrome"
+
+main() {
+    local volume="${SLIDES_DIR_ON_HOST}:${SLIDES_DIR_ON_CONTAINER}"
+    local port_mapping="${WEB_PORT_ON_HOST}:${WEB_PORT_ON_CONTAINER}"
+
+    # Launch docker container, then open web browser to container's URL
+    docker run \
+        --detach=true \
+        --volume="${volume}" \
+        --publish="${port_mapping}" \
+        "${REVEAL_JS_IMAGE}" && \
+    sleep $DELAY_BEFORE_OPEN && \
+    open -a "$WEB_BROWSER" "http://$(boot2docker ip):${WEB_PORT_ON_HOST}"
+}
+
+main $@

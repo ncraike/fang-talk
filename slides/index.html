@@ -1,0 +1,295 @@
+<!doctype html>
+<html lang="en">
+
+  <head>
+    <meta charset="utf-8">
+
+    <title>reveal.js - The HTML Presentation Framework</title>
+
+    <meta name="description" content="A framework for easily creating beautiful presentations using HTML">
+    <meta name="author" content="Hakim El Hattab">
+
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
+
+    <link rel="stylesheet" href="css/reveal.css">
+    <link rel="stylesheet" href="css/theme/solarized.css" id="theme">
+
+    <!-- Code syntax highlighting -->
+    <link rel="stylesheet" href="lib/css/zenburn.css">
+
+    <!-- Printing and PDF exports -->
+    <script>
+      var link = document.createElement( 'link' );
+      link.rel = 'stylesheet';
+      link.type = 'text/css';
+      link.href = window.location.search.match( /print-pdf/gi ) ? 'css/print/pdf.css' : 'css/print/paper.css';
+      document.getElementsByTagName( 'head' )[0].appendChild( link );
+    </script>
+
+    <!--[if lt IE 9]>
+    <script src="lib/js/html5shiv.js"></script>
+    <![endif]-->
+  </head>
+
+  <body>
+
+    <div class="reveal">
+
+      <!-- Any section element inside of this container is displayed as a slide -->
+      <div class="slides">
+        <section data-markdown>
+          <script type="text/template">
+# Fang
+### Dependency injection for Python
+
+Nathan Craike
+          </script>
+        </section>
+
+        <section data-markdown>
+          <script type="text/template">
+## "Why would I even want dependency injection in Python?"
+
+The common wisdom in Python is "we don't need dependency injection –
+that's a tool for *other languages*."
+
+Python is so flexible/powerful/dynamic/fantastic that we can do without.
+
+Or we can just use mocking, monkey-patching, etc instead when we need to.
+          </script>
+        </section>
+
+        <section data-markdown>
+          <script type="text/template">
+## The best reason to use dependency injection is unit testing.
+## *Easy unit testing*
+          </script>
+        </section>
+
+        <section>
+          <h2>"Why not just mock?"</h2>
+
+          <p>
+          Python has a lot of great mocking tools now. But how do you mock
+          something like this?
+          </p>
+
+<pre><code data-trim>
+# mymodule.py
+import os
+import json
+
+CONFIG_DIR = '~/.config/my_app'
+CONFIG_NAME = 'config.json'
+
+class MyClass:
+
+    def __init__(self, some_arg, another_arg):
+        config_path = os.path.join(CONFIG_DIR, CONFIG_NAME)
+        self.config = json.load(config_path)
+
+instance = MyClass('some param', 'another')
+
+# Code under test
+import mymodule
+
+def main():
+    doSomething(mymodule.instance)
+
+</code></pre>
+        </section>
+
+        <section data-markdown>
+          <script type="text/template">
+Python's import system encourages code depending on actual implementations of modules, classes, functions.
+
+Just importing a module can cause objects to be created, already referring
+to real functions, classes and data. Often in scopes you can't easily access.
+
+This can make mocking out dependencies extremely difficult: by the time your
+test code is trying to mock things out, *it's too late*.
+          </script>
+        </section>
+
+        <section data-markdown>
+          <script type="text/template">
+Dependency injection has other benefits too. Sometime, I'll describe them more here!
+          </script>
+        </section>
+
+        <section data-markdown>
+          <script type="text/template">
+## DI is popular in other languages, why don't we use it in Python?
+          </script>
+        </section>
+
+        <section data-markdown>
+          <script type="text/template">
+## …well, how do other languages do it?
+          </script>
+        </section>
+
+        <section data-markdown>
+          <script type="text/template">
+## Java
+
+Several DI libraries:
+
+ - Google Guice
+ - Spring
+ - Java EE6 CDI
+
+…most use XML for configuration.
+          </script>
+        </section>
+
+        <section data-markdown>
+          <script type="text/template">
+## C♯
+
+More DI libraries:
+
+ - Castle
+ - Unity
+
+…more XML for configuration.
+          </script>
+        </section>
+
+        <section data-markdown>
+          <script type="text/template">
+Most of the "traditional OO" languages' solutions use a lot of:
+
+ - static typing
+ - interfaces
+ - specialised config languages, often XML-based.
+
+We don't like these much in Python.
+          </script>
+        </section>
+
+
+        <section data-markdown>
+          <script type="text/template">
+(To be fair here, I should probably actually so some code samples.)
+
+(Screenshots? But I don't wanna install Eclipse…)
+          </script>
+        </section>
+
+        <section>
+          <h2>JavaScript</h2>
+
+          <p>
+            Modern JavaScript has a particular pattern for defining modules, which makes dependency injection very easy:
+          </p>
+
+<pre><code data-trim>
+var myModule = (function (someDependency, another Dependency) {
+
+    var module = {}
+
+    module.myFunction = function () {
+        // ...
+    }
+
+    return module;
+
+})(dependencyImplementation, anotherDependencyImplementation);
+</code></pre>
+
+          </script>
+        </section>
+
+        <section data-markdown>
+          <script type="text/template">
+JavaScript's approach is much closer to something we might use.
+
+Dependencies aren't strict interfaces or types, just names.
+          </script>
+        </section>
+
+        <section>
+          <p>
+          …but… this style of Python's probably never going to take off:
+          </p>
+
+<pre><code data-trim>
+# mymodule.py:
+
+def getMyModule(someDependency, another Dependency):
+
+    def my_function():
+        pass
+
+    return Module({
+        'my_function': my_function
+    })
+
+# Some other module:
+
+# No more imports, just this stuff!
+myModule = getMyModule(
+    dependency_implementation,
+    another_dependency_implementation)
+
+</code></pre>
+        </section>
+
+        <section data-markdown>
+          <script type="text/template">
+There are existing Python dependency injection frameworks.
+          </script>
+        </section>
+
+        <section data-markdown>
+          <script type="text/template">
+## Pinject
+
+ - Uses implicit bindings of dependency names to classes
+ - Dependencies are given to class constructors
+          </script>
+        </section>
+
+
+
+      </div>
+
+
+    </div>
+
+    <script src="lib/js/head.min.js"></script>
+    <script src="js/reveal.js"></script>
+
+    <script>
+
+      // Full list of configuration options available at:
+      // https://github.com/hakimel/reveal.js#configuration
+      Reveal.initialize({
+        controls: true,
+        progress: true,
+        history: true,
+        center: true,
+
+        transition: 'none', // none/fade/slide/convex/concave/zoom
+
+        // Optional reveal.js plugins
+        dependencies: [
+          { src: 'lib/js/classList.js', condition: function() { return !document.body.classList; } },
+          { src: 'plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+          { src: 'plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+          { src: 'plugin/highlight/highlight.js', async: true, condition: function() { return !!document.querySelector( 'pre code' ); }, callback: function() { hljs.initHighlightingOnLoad(); } },
+          { src: 'plugin/zoom-js/zoom.js', async: true },
+          { src: 'plugin/notes/notes.js', async: true },
+          // Remote control your reveal.js presentation using a touch device
+          { src: 'plugin/remotes/remotes.js', async: true }
+        ]
+      });
+
+    </script>
+
+  </body>
+</html>

@@ -1,15 +1,22 @@
 #!/usr/bin/env bash
 
-SLIDES_DIR_ON_HOST="$(pwd)/slides"
-SLIDES_DIR_ON_CONTAINER="/slides/"
+#SLIDES_DIR_ON_HOST="$(pwd)/slides"
+#SLIDES_DIR_ON_CONTAINER="/slides/"
+
+CONTAINER_NAME="fang_talk"
+
+#MARKDOWN_SLIDES="./index.md"
 
 WEB_PORT_ON_HOST=8000
 WEB_PORT_ON_CONTAINER=8000
 
-REVEAL_JS_IMAGE="danidemi/docker-reveal.js:latest"
+REVEAL_JS_IMAGE="ncraike/reveal.js:latest"
 
 DELAY_BEFORE_OPEN=1
 WEB_BROWSER="Google Chrome"
+
+readonly SUCCESS=0
+readonly FAILURE=1
 
 main() {
     local volume="${SLIDES_DIR_ON_HOST}:${SLIDES_DIR_ON_CONTAINER}"
@@ -17,12 +24,57 @@ main() {
 
     # Launch docker container, then open web browser to container's URL
     docker run \
+        --name="$CONTAINER_NAME" \
         --detach=true \
-        --volume="${volume}" \
         --publish="${port_mapping}" \
-        "${REVEAL_JS_IMAGE}" && \
-    sleep $DELAY_BEFORE_OPEN && \
+        "${REVEAL_JS_IMAGE}" || \
+        exit_if_failure "Couldn't start container"
+
+    sleep $DELAY_BEFORE_OPEN
+
+    if is_not_empty "$MARKDOWN_SLIDES"; then
+        docker exec \
+            --detach=false \
+            --interactive=true \
+            "$CONTAINER_NAME" \
+            /bin/sh -c "pandoc -t revealjs -s -o /slides/index.html" \
+        < $MARKDOWN_SLIDES
+        exit_if_failure "Couldn't generate slides from Markdown in ${MARKDOWN_SLIDES}"
+        sleep $DELAY_BEFORE_OPEN
+    fi
+
     open -a "$WEB_BROWSER" "http://$(boot2docker ip):${WEB_PORT_ON_HOST}"
+}
+
+err_msg() {
+    local args=$@
+    echo ${args} >&2
+}
+
+is_not_empty() {
+    local val=$1
+    [[ -n $val ]]
+}
+
+exit_if_failure() {
+    local last_exit_code=$?
+    local message=$@
+
+    if [[ "${last_exit_code}" != "0" ]]; then
+        # Show error message if given
+        if is_not_empty ${message}; then
+            err_msg "${message} (Exit code: ${last_exit_code})"
+        # Show generic error message otherwise
+        else
+            err_msg "Last command gave non-zero exit code: ${last_exit_code}"
+        fi
+
+        exit ${last_exit_code}
+
+    else
+        return ${SUCCESS}
+
+    fi
 }
 
 main $@

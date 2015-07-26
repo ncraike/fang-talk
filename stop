@@ -3,8 +3,10 @@
 CONTAINER_NAME="fang_talk"
 
 main() {
-    docker kill "$CONTAINER_NAME" && \
-    docker rm "$CONTAINER_NAME"
+    (
+        docker kill "$CONTAINER_NAME" && \
+        docker rm "$CONTAINER_NAME"
+    ) > /dev/null
 }
 
 main $@

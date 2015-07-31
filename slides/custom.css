@@ -7,3 +7,40 @@
 .reveal p {
   font-size: 1.0em
 }
+
+.reveal pre code {
+  /*
+   * Fix reveal.js theme overriding highlight.js code block styling
+   */
+
+  /* For solarized_light */
+  /*
+   * background: #fdf6e3;
+   * color: #657b83;
+   */
+  /* For solarized_dark */
+  background: #002b36;
+  color: #839496;
+
+  /*
+   * Prevent code blocks gaining scrollbars.
+   */
+  max-height: none;
+}
+
+.reveal .no-all-caps {
+    text-transform: none;
+}
+
+/*
+ * Change size and spacing a bit on in-line code blocks.
+ */
+.reveal p code {
+    font-size: 0.9em;
+    margin-left: 0.2em;
+    margin-right: 0.2em;
+}
+
+.reveal .note {
+    font-size: 0.7em;
+}

@@ -51,6 +51,80 @@ Nathan Craike
 
         <section data-markdown>
           <script type="text/template">
+## What is dependency injection?
+
+Dependency injection is a pattern of code allowing *another piece of software*
+to give it resources it needs, rather than referring to those resources
+directly.
+
+These other resources may be libraries, services, or individual object
+instances.
+          </script>
+        </section>
+
+        <section>
+<h2>Martin Fowler's definition…</h2>
+
+<p>
+…is several paragraphs long. Also, UML.
+</p>
+
+<blockquote>
+  <p>
+    The basic idea of the Dependency Injection is to have a separate object, an assembler, that populates a field in the lister class with an appropriate implementation for the finder interface, resulting in a dependency diagram along the lines of Figure 2
+  </p>
+
+  <img src="images/martinfowler_com_injector.gif">
+
+  <p>
+    There are three main styles of dependency injection. The names I'm using for them are Constructor Injection, Setter Injection, and Interface Injection.
+  </p>
+</blockquote>
+        </section>
+
+
+        <section data-markdown>
+          <script type="text/template">
+## Java
+
+Several DI libraries:
+
+ - Google Guice
+ - Spring
+ - Java EE6 CDI
+
+…most use XML for configuration.
+          </script>
+        </section>
+
+        <section data-markdown>
+          <script type="text/template">
+## C♯
+
+More DI libraries:
+
+ - Castle
+ - Unity
+
+…more XML for configuration.
+          </script>
+        </section>
+
+        <section data-markdown>
+          <script type="text/template">
+Most of the "traditional OO" languages' solutions use a lot of:
+
+ - static typing
+ - interfaces
+ - specialised config languages, often XML-based.
+ - heavy IDE integration
+
+None of these things are very popular in Python.
+          </script>
+        </section>
+
+        <section data-markdown>
+          <script type="text/template">
 ## "Why would I even want dependency injection in Python?"
 
 The common wisdom in Python is "we don't need dependency injection –
@@ -132,53 +206,6 @@ Dependency injection has other benefits too. Sometime, I'll describe them more h
           </script>
         </section>
 
-        <section data-markdown>
-          <script type="text/template">
-## Java
-
-Several DI libraries:
-
- - Google Guice
- - Spring
- - Java EE6 CDI
-
-…most use XML for configuration.
-          </script>
-        </section>
-
-        <section data-markdown>
-          <script type="text/template">
-## C♯
-
-More DI libraries:
-
- - Castle
- - Unity
-
-…more XML for configuration.
-          </script>
-        </section>
-
-        <section data-markdown>
-          <script type="text/template">
-Most of the "traditional OO" languages' solutions use a lot of:
-
- - static typing
- - interfaces
- - specialised config languages, often XML-based.
-
-We don't like these much in Python.
-          </script>
-        </section>
-
-
-        <section data-markdown>
-          <script type="text/template">
-(To be fair here, I should probably actually so some code samples.)
-
-(Screenshots? But I don't wanna install Eclipse…)
-          </script>
-        </section>
 
         <section>
           <h2>JavaScript</h2>

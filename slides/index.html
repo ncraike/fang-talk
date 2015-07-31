@@ -54,35 +54,35 @@ Nathan Craike
           <script type="text/template">
 ## What is dependency injection?
 
-Dependency injection is a pattern of code allowing *another piece of software*
-to give it resources it needs, rather than referring to those resources
-directly.
+Dependency injection is a pattern where code doesn't refer directly to resources it needs. Instead, the code relies on another piece of software providing these resources.
 
-These other resources may be libraries, services, or individual object
-instances.
+These other resources may be libraries, services, functions, or other objects.
           </script>
         </section>
 
-        <section>
-<h2>Martin Fowler's definition…</h2>
+        <section data-markdown>
+          <script type="text/template">
+## What is a dependency injection framework?
 
-<p>
-…is several paragraphs long. Also, UML.
-</p>
+The dependency injection framework is the "other piece of software" in this pattern. It's responsible for tracking what code needs, and finding and giving resources when they're needed.
 
-<blockquote>
-  <p>
-    The basic idea of the Dependency Injection is to have a separate object, an assembler, that populates a field in the lister class with an appropriate implementation for the finder interface, resulting in a dependency diagram along the lines of Figure 2
-  </p>
-
-  <img src="images/martinfowler_com_injector.gif">
-
-  <p>
-    There are three main styles of dependency injection. The names I'm using for them are Constructor Injection, Setter Injection, and Interface Injection.
-  </p>
-</blockquote>
+For… complicated reasons, it's sometimes called an "inversion of control container", an "IoC&nbsp;container" or just a "container".
+          </script>
         </section>
 
+        <section data-markdown>
+          <script type="text/template">
+## What does dependency injection usually look like?
+          </script>
+        </section>
+
+        <section data-markdown>
+          <script type="text/template">
+## …as seen in Java:
+
+
+          </script>
+        </section>
 
         <section data-markdown>
           <script type="text/template">
@@ -90,8 +90,8 @@ instances.
 
 Several DI libraries:
 
- - Google Guice
  - Spring
+ - Google Guice
  - Java EE6 CDI
 
 …most use XML for configuration.
@@ -106,6 +106,7 @@ More DI libraries:
 
  - Castle
  - Unity
+ - Spring .NET
 
 …more XML for configuration.
           </script>
@@ -113,16 +114,29 @@ More DI libraries:
 
         <section data-markdown>
           <script type="text/template">
-Most of the "traditional OO" languages' solutions use a lot of:
+## Java and C# solutions make heavy use of:
 
  - static typing
  - interfaces
- - specialised config languages, often XML-based.
- - heavy IDE integration
+ - specialised config languages (usually XML)
+ - and…
+          </script>
+        </section>
 
+        <section data-markdown>
+          <script type="text/template">
+
+- …an assumption that the smallest unit of code is a class.
+
+          </script>
+        </section>
+
+        <section data-markdown>
+          <script type="text/template">
 None of these things are very popular in Python.
           </script>
         </section>
+
 
         <section data-markdown>
           <script type="text/template">
@@ -133,35 +147,39 @@ that's a tool for *other languages*."
 
 Python is so flexible/powerful/dynamic/fantastic that we can do without.
 
-Or we can just use mocking, monkey-patching, etc instead when we need to.
+If we do need to change dependencies, we can just mock and monkey-patch.
           </script>
         </section>
 
         <section data-markdown>
           <script type="text/template">
-## The best reason to use dependency injection is unit testing.
-## *Easy unit testing*
+## The best reason to use dependency&nbsp;injection is unit testing.
+## *Easy* &nbsp;unit testing.
+          </script>
+        </section>
+
+        <section data-markdown>
+          <script type="text/template">
+## "Why not just mock?"
+
+Python has a lot of great mocking tools now.
+
+But mocking can still be a lot of hassle.
           </script>
         </section>
 
         <section>
-          <h2>"Why not just mock?"</h2>
-
-          <p>
-          Python has a lot of great mocking tools now. But how do you mock
-          something like this?
-          </p>
+<p>
+How do you mock something like this?
+</p>
 
 <pre><code data-trim>
 # mymodule.py
 import os
 import json
-
-CONFIG_DIR = '~/.config/my_app'
-CONFIG_NAME = 'config.json'
+CONFIG_DIR, CONFIG_NAME = '~/.config/my_app', 'config.json'
 
 class MyClass:
-
     def __init__(self, some_arg, another_arg):
         config_path = os.path.join(CONFIG_DIR, CONFIG_NAME)
         self.config = json.load(config_path)
@@ -172,18 +190,24 @@ instance = MyClass('some param', 'another')
 import mymodule
 
 def main():
-    doSomething(mymodule.instance)
+    do_some_stuff_with(mymodule.instance)
 
 </code></pre>
         </section>
 
         <section data-markdown>
           <script type="text/template">
-Python's import system encourages code depending on actual implementations of modules, classes, functions.
+## Python's import system
+
+Python's import system encourages directly referencing actual implementations of modules, classes and functions, at import time.
 
 Just importing a module can cause objects to be created, already referring
-to real functions, classes and data. Often in scopes you can't easily access.
+to real functions, classes and data, in scopes you can't easily access.
+          </script>
+        </section>
 
+        <section data-markdown>
+          <script type="text/template">
 This can make mocking out dependencies extremely difficult: by the time your
 test code is trying to mock things out, *it's too late*.
           </script>
@@ -191,19 +215,9 @@ test code is trying to mock things out, *it's too late*.
 
         <section data-markdown>
           <script type="text/template">
-Dependency injection has other benefits too. Sometime, I'll describe them more here!
-          </script>
-        </section>
+## How can we make *usable* dependency injection in Python?
 
-        <section data-markdown>
-          <script type="text/template">
-## DI is popular in other languages, why don't we use it in Python?
-          </script>
-        </section>
-
-        <section data-markdown>
-          <script type="text/template">
-## …well, how do other languages do it?
+Well… Java and C# aren't the only games in town…
           </script>
         </section>
 
@@ -234,21 +248,20 @@ var myModule = (function (someDependency, another Dependency) {
 
         <section data-markdown>
           <script type="text/template">
-JavaScript's approach is much closer to something we might use.
+JavaScript's approach is much closer to something we'd use.
 
-Dependencies aren't strict interfaces or types, just names.
+Dependencies aren't strict interfaces or types, just values with names.
           </script>
         </section>
 
         <section>
           <p>
-          …but… this style of Python's probably never going to take off:
+          …we're probably never going to write Python like this:
           </p>
 
 <pre><code data-trim>
 # mymodule.py:
-
-def getMyModule(someDependency, another Dependency):
+def make_mymodule(some_dependency, another_dependency):
 
     def my_function():
         pass
@@ -257,10 +270,10 @@ def getMyModule(someDependency, another Dependency):
         'my_function': my_function
     })
 
-# Some other module:
+# Your code:
 
-# No more imports, just this stuff!
-myModule = getMyModule(
+# No imports, just this:
+mymodule = make_mymodule(
     dependency_implementation,
     another_dependency_implementation)
 
@@ -313,7 +326,7 @@ There are existing Python dependency injection frameworks.
           { src: 'plugin/zoom-js/zoom.js', async: true },
           { src: 'plugin/notes/notes.js', async: true },
           // Remote control your reveal.js presentation using a touch device
-          { src: 'plugin/remotes/remotes.js', async: true }
+          //{ src: 'plugin/remotes/remotes.js', async: true }
         ]
       });
 

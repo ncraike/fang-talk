@@ -1,11 +1,9 @@
 #!/usr/bin/env bash
 
-#SLIDES_DIR_ON_HOST="$(pwd)/slides"
-#SLIDES_DIR_ON_CONTAINER="/slides/"
+SLIDES_DIR_ON_HOST="$(pwd)/slides"
+SLIDES_DIR_ON_CONTAINER="/slides/"
 
 CONTAINER_NAME="fang_talk"
-
-#MARKDOWN_SLIDES="./index.md"
 
 WEB_PORT_ON_HOST=8000
 WEB_PORT_ON_CONTAINER=8000
@@ -26,22 +24,12 @@ main() {
     docker run \
         --name="$CONTAINER_NAME" \
         --detach=true \
+        --volume="${volume}" \
         --publish="${port_mapping}" \
-        "${REVEAL_JS_IMAGE}" || \
-        exit_if_failure "Couldn't start container"
+        "${REVEAL_JS_IMAGE}"
+    exit_if_failure "Couldn't start container"
 
     sleep $DELAY_BEFORE_OPEN
-
-    if is_not_empty "$MARKDOWN_SLIDES"; then
-        docker exec \
-            --detach=false \
-            --interactive=true \
-            "$CONTAINER_NAME" \
-            /bin/sh -c "pandoc -t revealjs -s -o /slides/index.html" \
-        < $MARKDOWN_SLIDES
-        exit_if_failure "Couldn't generate slides from Markdown in ${MARKDOWN_SLIDES}"
-        sleep $DELAY_BEFORE_OPEN
-    fi
 
     open -a "$WEB_BROWSER" "http://$(boot2docker ip):${WEB_PORT_ON_HOST}"
 }

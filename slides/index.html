@@ -43,13 +43,16 @@
 
       <!-- Any section element inside of this container is displayed as a slide -->
       <div class="slides">
-        <section data-markdown>
-          <script type="text/template">
-# Fang
-### Dependency injection for Python
 
-Nathan Craike
-          </script>
+        <section>
+          <h1> Fang </h2>
+          <h3>Dependency injection for Python</h3>
+
+          <p>Nathan Craike</p>
+          <p>
+            <br>
+            <a href="http://github.com/ncraike/fang">github.com/ncraike/fang</a>
+          </p>
         </section>
 
         <section data-markdown>
@@ -74,14 +77,9 @@ For… complicated reasons, it's sometimes called an "inversion of control conta
 
         <section data-markdown>
           <script type="text/template">
-## What does dependency injection usually look like?
+## How is dependency injection normally used?
           </script>
         </section>
-
-        <section data-markdown>
-          <script type="text/template">
-## …as seen in Java:
-
 
           </script>
         </section>
@@ -121,21 +119,23 @@ More DI libraries:
  - static typing
  - interfaces
  - specialised config languages (usually XML)
- - and…
+ - and most of all…
           </script>
         </section>
 
         <section data-markdown>
           <script type="text/template">
 
-- …an assumption that the smallest unit of code is a class.
+## Java and C# solutions make heavy use of:
+
+- assuming that the smallest unit of code is a class
 
           </script>
         </section>
 
         <section data-markdown>
           <script type="text/template">
-None of these things are very popular in Python.
+None of these are very popular in Python.
           </script>
         </section>
 
@@ -171,9 +171,9 @@ But mocking can still be a lot of hassle.
         </section>
 
         <section>
-<p>
-How do you mock something like this?
-</p>
+<h2>
+How do you mock this?
+</h2>
 
 <pre><code data-trim>
 # mymodule.py
@@ -204,14 +204,28 @@ def main():
 Python's import system encourages directly referencing actual implementations of modules, classes and functions, at import time.
 
 Just importing a module can cause objects to be created, already referring
-to real functions, classes and data, in scopes you can't easily access.
+to real functions, classes and data, in scopes you can't easily reach.
           </script>
         </section>
 
         <section data-markdown>
           <script type="text/template">
+## Python's import system
+
 This can make mocking out dependencies extremely difficult: by the time your
 test code is trying to mock things out, *it's too late*.
+          </script>
+        </section>
+
+        <section data-markdown>
+          <script type="text/template">
+## Missing mocks
+
+What happens if you forget to mock out a dependency?
+
+Or your code changes but your tests don't?
+
+Are you now making real network requests, or writing real files to disk?
           </script>
         </section>
 
@@ -225,11 +239,11 @@ Well… Java and C# aren't the only games in town…
 
 
         <section>
-          <h2>JavaScript</h2>
+<h2>JavaScript</h2>
 
-          <p>
-            Modern JavaScript has a particular pattern for defining modules, which makes dependency injection very easy:
-          </p>
+<p>
+Modern JavaScript has a particular pattern for defining modules, which makes dependency injection very easy:
+</p>
 
 <pre><code data-trim>
 var myModule = (function (someDependency, another Dependency) {
@@ -250,15 +264,19 @@ var myModule = (function (someDependency, another Dependency) {
 
         <section data-markdown>
           <script type="text/template">
+## JavaScript
+
 JavaScript's approach is much closer to something we'd use.
 
 Dependencies aren't strict interfaces or types, just values with names.
+
+Much like duck-typing, so long as those values are only asked to do things they *can* do, everyone is happy.
           </script>
         </section>
 
         <section>
           <p>
-          …we're probably never going to write Python like this:
+          Still, we're probably not going to write Python like this:
           </p>
 
 <pre><code data-trim>
@@ -280,6 +298,250 @@ mymodule = make_mymodule(
     another_dependency_implementation)
 
 </code></pre>
+        </section>
+
+        <section data-markdown>
+          <script type="text/template">
+So, considering all this… we have Fang.
+          </script>
+        </section>
+
+        <section>
+<h2>Fang's core design principles:</h2>
+
+<ul>
+  <li>Resources are just names</li>
+  <li>Providers are just functions</li>
+  <li>Configuration is just Python code</li>
+</ul>
+        </section>
+
+        <section>
+<h2>
+A simple example:
+</h2>
+
+<pre><code data-trim>
+import fang
+di = fang.Di()
+
+@di.dependsOn('multiplier')
+def multiply(n):
+    '''Multiply the given number n by some configured multiplier.'''
+    multiplier = di.resolver.unpack(multiply)
+    return multiplier * n
+
+def give_multiplier():
+    '''Give a multiplier of 2.'''
+    return 2
+
+def main():
+    # Here at our entry-point, we configure which providers we'll use
+    di.providers.register('multiplier', give_multiplier)
+    # Prints 10
+    print(multiply(5))
+
+if __name__ == '__main__': main()
+</code></pre>
+        </section>
+
+        <section>
+          <h2>
+          The di object
+          </h2>
+
+          <pre><code data-trim>
+          di = fang.Di()
+          </code></pre>
+
+          <pre><code data-trim>
+class Di:
+
+    def __init__(self):
+        self.dependencies = DependencyRegister()
+        self.providers = ResourceProviderRegister()
+        self.resolver = DependencyResolver(
+                dependency_register=self.dependencies,
+                resource_provider_register=self.providers)
+
+        # For use as a decorator
+        self.dependsOn = self.dependencies.register
+          </code></pre>
+
+        </section>
+
+        <section>
+          <h2>
+            Registering dependencies
+          </h2>
+
+          <pre><code data-trim>
+@di.dependsOn('multiplier')
+def multiply(n):
+    ...
+          </code></pre>
+
+          <p>
+            The <code>DependencyRegister</code> records the <code>multiply</code> function's dependency on some resource called <code>"multiplier"</code>.
+          <p>
+        </section>
+
+        <section>
+          <h2>
+          Registering providers
+          </h2>
+
+          <p>
+          Providers aren't loaded into the main <code>di</code> object until the program entry-point.
+          </p>
+
+          <pre><code data-trim>
+def main():
+    # Here at our entry-point, we configure which providers we'll use
+    di.providers.register('multiplier', give_multiplier)
+    ...
+
+          </code></pre>
+
+          <p>
+          Until this point, Fang has no record of which functions provide which dependencies.
+        </section>
+
+        <section>
+          <h2>
+            Resolving dependencies
+          </h2>
+
+          <p>
+          A <code>DependencyResolver</code> knows how to match up dependencies with appropriate providers:
+          </p>
+
+<pre><code data-trim>
+class Di:
+
+    def __init__(self, namespace=None):
+        ...
+        self.resolver = DependencyResolver(
+                dependency_register=self.dependencies,
+                resource_provider_register=self.providers)
+</code></pre>
+        </section>
+
+        <section>
+          <h2>
+            Resolving dependencies
+          </h2>
+
+          <p>
+          The resolver's <code>unpack</code> method gives a dependent all the resources it needs:
+          </p>
+
+<pre><code data-trim>
+@di.dependsOn('multiplier')
+def multiply(n):
+    '''Multiply the given number n by some configured multiplier.'''
+    multiplier = di.resolver.unpack(multiply)
+    ...
+</code></pre>
+
+        </section>
+
+        <section>
+          <h2>
+            Multiple dependences
+          </h2>
+
+          <p>
+            Multiple dependencies are just multiple decorations.
+          </p>
+
+          <p>
+            <code>unpack</code> gives a tuple for easy assignment.
+          </p>
+
+<pre><code data-trim>
+@di.dependsOn('multiplier')
+@di.dependsOn('offset')
+def multiply_and_add(n):
+    '''
+    Multiply the given number n by some configured multiplier, and
+    then add a configured offset.
+    '''
+    multiplier, offset = di.resolver.unpack(multiply_and_add)
+    return (multiplier * n) + offset
+</code></pre>
+
+        </section>
+
+        <section>
+          <h2>
+            Classes
+          </h2>
+
+          <p>
+          A class's dependencies are unpacked in the constructor.
+          </p>
+
+<pre><code data-trim>
+@di.dependsOn('config.region')
+@di.dependsOn('auth.credentials')
+@di.dependsOn('network.http')
+class ApiAccess:
+
+    def __init__(self):
+        (self.region, self.credentials, self.http
+                ) = di.resolver.unpack(ApiAccess)
+
+    def connect(self):
+        self.connection = self.http.connect(region.url)
+        ...
+</code></pre>
+
+        </section>
+
+        <section>
+          <h2>
+            Unit testing
+          </h2>
+
+<pre><code data-trim>
+@di.dependsOn('multiplier')
+@di.dependsOn('offset')
+def multiply_and_add(n):
+    multiplier, offset = di.resolver.unpack(multiply_and_add)
+    return (n * multiplier) + offset
+
+def test_multiply_and_add():
+    di.providers.clear()
+    di.providers.mass_register({
+        'multiplier': 3,
+        'offset': 1,
+    })
+
+    # This fails if we've forgotten to provide something
+    assert di.resolver.are_all_dependencies_met_for(multiply)
+
+    # (2 * 3) + 1 should be 7
+    result = multiply_and_add(2)
+    assert result == 7
+</code></pre>
+
+        </section>
+
+        <section>
+          <h1> Fang </h2>
+          <h3>Dependency injection for Python</h3>
+          <p>
+            <a href="http://github.com/ncraike/fang">github.com/ncraike/fang</a>
+          </p>
+
+          <p>
+            Nathan Craike
+            <br>
+            <a href="mailto://me@ncraike.com">me@ncraike.com</a>
+            <br>
+            <a href="http://twitter.com/ncraike">twitter.com/ncraike</a>
+          </p>
         </section>
 
       </div>

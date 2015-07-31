@@ -529,6 +529,159 @@ def test_multiply_and_add():
         </section>
 
         <section>
+          <h2>
+            Planned features
+          </h2>
+
+          <ul>
+            <li> Package it to PyPI
+            <li> Namespace support
+            <li> Concise namespace syntax
+            <li> Adapters for Python standard library
+            <li> Adapters for other libraries
+            <li> Helpers for tests
+          </ul>
+
+        </section>
+
+        <section>
+          <h2>
+            Planned: Package it to PyPI
+          </h2>
+
+          <p>
+          I have a <code>setup.py</code>, so we're not too far off.
+          </p>
+
+          <p>
+          This will probably be done by the end of the conference.
+          </p>
+        </section>
+
+        <section>
+          <h2>
+            Planned: Namespace support
+          </h2>
+
+<pre><code data-trim>
+# Set the default namespace for your project
+di = fang.Di(namespace='.com.ncraike.myproject')
+</code></pre>
+
+<pre><code data-trim>
+# This is within .com.ncraike.myproject:
+@di.dependsOn('auth.credentials')
+# These are both absolute identifiers:
+@di.dependsOn('.org.python.stdlib.urllib.request:urlopen')
+@di.dependsOn('.com.getoffmalawn.outbox:send')
+def get_the_data_send_the_thing():
+    creds, urlopen, send = di.resolver.unpack(
+            get_the_data_send_the_thing)
+    ...
+</code></pre>
+
+        </section>
+
+        <section>
+          <h2 style="text-decoration: line-through;">
+            Planned: Better Namespace support
+          </h2>
+
+          <h2>
+            Planned: More concise namespace syntax
+          </h2>
+
+<pre><code data-trim>
+# This is within .com.ncraike.myproject:
+@di.dependsOn('auth.credentials')
+# These are both absolute identifiers, but mercifully shorter:
+@di.dependsOn['python']('urllib.request:urlopen')
+@di.dependsOn['outbox']('send')
+def get_the_data_send_the_thing():
+    creds, urlopen, send = di.resolver.unpack(
+            get_the_data_send_the_thing)
+    ...
+</code></pre>
+
+        </section>
+
+        <section>
+          <h2>
+            Planned: Adapters for standard library
+          </h2>
+
+          <p>
+            Trust me, you don't want to write a lot of these by hand:
+          </p>
+
+<pre><code data-trim>
+@di.dependsOn('.org.python.stdlib.os')
+@providers.register('.org.python.stdlib.os:path.exists')
+def python_os_path_exists():
+    os = di.resolver.unpack(python_os_path_exists)
+    return os.path.exists
+
+@di.dependsOn('.org.python.stdlib.os')
+@providers.register('.org.python.stdlib.os:path.join')
+def python_os_path_join():
+    os = di.resolver.unpack(python_os_path_join)
+    return os.path.join
+
+@providers.register('.org.python.stdlib.datetime')
+def python_datetime_module():
+    import datetime
+    return datetime
+</code></pre>
+        </section>
+
+        <section>
+          <h2>
+            Planned: Adapters for other libaries
+          </h2>
+
+          <p>
+              It's just as tedious for third-party libraries.
+          </p>
+
+<pre><code data-trim>
+@di.dependsOn('.org.notpython.stdlib.os')
+@providers.register('.org.notpython.nonstdlib.os:path.exists')
+def notpython_os_path_exists():
+    notos = di.resolver.unpack(notpython_os_path_exists)
+    return notos.path.exists
+
+@di.dependsOn('.org.notpython.stdlib.os')
+@providers.register('.org.notpython.nonstdlib.os:path.join')
+def notpython_os_path_join():
+    notos = di.resolver.unpack(notpython_os_path_join)
+    return notos.path.join
+
+@providers.register('.org.notpython.nonstdlib.datetime')
+def notpython_datetime_module():
+    import i_cant_believe_its_not_datetime
+    return i_cant_believe_its_not_datetime
+</code></pre>
+
+        </section>
+
+
+        <section>
+          <h2>
+            Planned: Helpers for tests
+          </h2>
+
+          <p>
+          Not sure of syntax yet, but there's certainly some common patterns which you don't want to implement every time.
+          </p>
+        </section>
+
+        <section data-markdown>
+          <script type="text/template">
+## That's all for now.
+          </script>
+        </section>
+
+        <section>
           <h1> Fang </h2>
           <h3>Dependency injection for Python</h3>
           <p>
